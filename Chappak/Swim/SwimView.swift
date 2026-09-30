@@ -3,8 +3,7 @@ import SwiftUI
 struct SwimView: View {
     @Environment(SwimStore.self) private var store
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 7)
-    private let weekdaySymbols = ["M", "T", "W", "T", "F", "S", "S"]
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 6)
 
     var body: some View {
         NavigationStack {
@@ -35,28 +34,20 @@ struct SwimView: View {
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
+    /// Simple grid, counting down from 30 to 1.
     private var grid: some View {
-        VStack(spacing: 10) {
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(weekdaySymbols.indices, id: \.self) { i in
-                    Text(weekdaySymbols[i])
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+        LazyVGrid(columns: columns, spacing: 10) {
+            ForEach(store.sessions.reversed()) { session in
+                NavigationLink(value: session.number) {
+                    SessionCell(session: session)
                 }
-            }
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(store.sessions) { session in
-                    NavigationLink(value: session.number) {
-                        SessionCell(session: session)
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        Button {
-                            store.toggleCompleted(session.number)
-                        } label: {
-                            Label(session.isCompleted ? "Mark Incomplete" : "Mark Completed",
-                                  systemImage: session.isCompleted ? "xmark.circle" : "checkmark.circle")
-                        }
+                .buttonStyle(.plain)
+                .contextMenu {
+                    Button {
+                        store.toggleCompleted(session.number)
+                    } label: {
+                        Label(session.isCompleted ? "Mark Incomplete" : "Mark Completed",
+                              systemImage: session.isCompleted ? "xmark.circle" : "checkmark.circle")
                     }
                 }
             }
